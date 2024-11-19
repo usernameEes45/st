@@ -1,0 +1,164 @@
+WEATHER WIDGET
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oras, Petsa, at Panahon</title>
+  <style>
+    /* Overall page styling */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center; /* Center items vertically */
+      height: 100vh; /* Full viewport height */
+      margin: 0;
+      background: #f5f7fa; /* Keeping original background */
+      font-family: 'Arial', sans-serif;
+      color: #333; /* Default text color */
+      padding: 20px; /* Added padding for mobile screens */
+      overflow: hidden; /* Prevent scrolling */
+    }
+
+    /* Main container for the clock and weather */
+    .main-container {
+      display: flex; /* Flexbox to align items horizontally */
+      flex-wrap: wrap; /* Allow wrapping on smaller screens */
+      gap: 20px; /* Space between items */
+      justify-content: center; /* Center align items */
+      max-width: 800px; /* Max width for better layout */
+      width: 100%; /* Full width for smaller screens */
+      margin-top: 20px; /* Margin at the top for spacing */
+    }
+
+    /* Styling for the time directly on the page */
+    .time {
+      font-size: 5vw; /* Increased font size for digital clock */
+      font-weight: bold; /* Bold text for time */
+      color: #734332; /* Using specified color for time */
+      text-align: center; /* Center text */
+    }
+
+    .location {
+      font-size: 1.5vw; /* Reduced font size for location */
+      color: #5b3229; /* Slightly darker shade for location */
+      text-align: center; /* Center text */
+    }
+
+    /* Widget styling */
+    .widget {
+      display: flex;
+      flex-direction: column; /* Stack items vertically */
+      padding: 15px; /* Padding for the widget */
+      border: 2px solid #734332; /* Using specified color for widget border */
+      border-radius: 8px; /* Rounded corners */
+      background-color: #ffffff; /* Background color for contrast */
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+      flex: 1 1 45%; /* Allow widgets to grow and shrink with a base width of 45% */
+      min-width: 250px; /* Minimum width for better mobile display */
+      max-width: 400px; /* Maximum width to prevent too large on big screens */
+      overflow-wrap: break-word; /* Prevent overflow of text */
+      text-align: center; /* Center text for aesthetics */
+    }
+
+    /* Weather widget styling */
+    .weather {
+      font-size: 1.5vw; /* Reduced font size for weather info */
+      color: #333; /* Color for weather info */
+    }
+
+    .weather div {
+      display: flex;
+      align-items: center;
+      gap: 5px; /* Space between weather items */
+    }
+
+    .weather .icon {
+      margin-right: 5px; /* Space between emoji and text */
+    }
+
+    /* Media Queries for Responsive Design */
+    @media (max-width: 600px) {
+      .time {
+        font-size: 8vw; /* Larger font size for digital clock on mobile */
+      }
+
+      .location {
+        font-size: 3vw; /* Larger font size for location on mobile */
+      }
+
+      .weather {
+        font-size: 3vw; /* Larger font size for weather info on mobile */
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="main-container">
+  <!-- Digital Clock without Widget Container -->
+  <div>
+    <div class="time"></div>
+    <div class="location">Daet, Camarines Norte, Philippines</div>
+  </div>
+
+  <!-- Weather Widget -->
+  <div class="widget weather-widget">
+    <div class="weather">
+      <div>Loading weather...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // JavaScript to update the time
+  function updateTimeAndDate() {
+    const timeElement = document.querySelector('.time');
+    
+    const now = new Date();
+    
+    // Format time in 12-hour format with AM/PM
+    const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    
+    timeElement.textContent = time;
+  }
+
+  // Function to fetch weather data
+  async function fetchWeather() {
+    const apiUrl = 'https://api.open-meteo.com/v1/forecast?latitude=14.1122&longitude=122.9553&hourly=temperature_2m&daily=weather_code,sunrise,sunset,uv_index_max&timezone=Asia%2FSingapore&forecast_days=3';
+    const weatherElement = document.querySelector('.weather');
+    
+    try {
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      
+      // Extract today's weather data
+      const todayTemperature = data.hourly.temperature_2m[0]; // Using the first hourly temperature
+      const sunrise = new Date(data.daily.sunrise[0]).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }); // Get sunrise in 12-hour format
+      const sunset = new Date(data.daily.sunset[0]).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }); // Get sunset in 12-hour format
+
+      // Display weather information with emojis and text
+      weatherElement.innerHTML = `
+        <div>
+          <span class="icon">🌡️</span> Temperature: ${todayTemperature}°C
+        </div>
+        <div>
+          <span class="icon">🌅</span> Sunrise: ${sunrise} | <span class="icon">🌇</span> Sunset: ${sunset}
+        </div>
+      `;
+    } catch (error) {
+      weatherElement.innerHTML = "Couldn't load weather data";
+    }
+  }
+
+  // Update the time every second and fetch weather once
+  setInterval(() => {
+    updateTimeAndDate();
+  }, 1000);
+  updateTimeAndDate();
+  fetchWeather();
+</script>
+
+</body>
+</html>
